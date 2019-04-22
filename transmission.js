@@ -45,6 +45,47 @@ module.exports = function(RED) {
     });
 
 
+function TransmissonGoSlow(n) {
+        RED.nodes.createNode(this,n);
+        this.config = RED.nodes.getNode(n.config);
+        var node = this;
+        var TransmissionAPI = this.config ? this.config.TransmissionAPI : null;
+
+	if (!TransmissionAPI) {
+            node.warn("Missing Transmission credentials");
+            node.status({fill:"red",shape:"ring",text:"Missing Transmission credentials"});
+            return;
+        }
+
+        node.status({});
+        node.on("input", function(msg) {
+            node.status({fill:"blue",shape:"dot",text:"Calling Transmission"});
+
+            TransmissionAPI.sessionSet(function(err, result) {
+                if (err) {
+                    node.error("failed to fetch Transmission Torrents : " + err);
+                    node.log( JSON.stringify( err ));
+                    
+                    node.status({fill:"red",shape:"ring",text:"error"});
+                    return;
+                }
+        
+                node.status({});
+    
+                node.status({fill:"green",shape:"dot",text:"processing"});
+    
+                msg.topic = "/transmission.v1/torrentData";
+                msg.payload = result;
+                node.send(msg);
+    
+                node.status({});
+
+            })
+        })
+
+    }
+    RED.nodes.registerType("Transmission Go Slow", TransmissonGoSlow);
+	
     function TransmissonTorrentList(n) {
         RED.nodes.createNode(this,n);
         this.config = RED.nodes.getNode(n.config);
