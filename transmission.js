@@ -61,7 +61,7 @@ function TransmissonGoSlow(n) {
         node.on("input", function(msg) {
             node.status({fill:"blue",shape:"dot",text:"Calling Transmission"});
 
-            TransmissionAPI.sessionSet(function(err, result) {
+            TransmissionAPI.session({'alt-speed-enabled':true}, function(err, result) {
                 if (err) {
                     node.error("failed to fetch Transmission Torrents : " + err);
                     node.log( JSON.stringify( err ));
